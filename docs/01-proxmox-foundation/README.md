@@ -1,5 +1,9 @@
 # Proxmox VE Node: Deployment, Fault Investigation & Stabilization
 
+![Proxmox](https://img.shields.io/badge/Proxmox-VE-E57000?style=for-the-badge&logo=proxmox&logoColor=white)
+![Platform](https://img.shields.io/badge/Platform-Homelab-blue?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Documented-success?style=for-the-badge)
+
 > **Status:** The node is stable on kernel `7.0.14-24-pve`. I re-enabled Turbo Boost and I'm running with the known risk, since this is a non-production lab. I confirmed the fault depends on turbo, but I did not isolate the failing component.
 
 ## Overview
@@ -30,9 +34,8 @@ I deployed a single-node Proxmox VE hypervisor as the foundation for a cybersecu
 **Fix:** In the web UI under *Node > Updates > Repositories*, I disabled the enterprise repositories and confirmed `pve-no-subscription` was active.
 **Verification:** `apt update` completed cleanly.
 
-<!-- Uncomment after uploading images/02-repos.png
-![Repositories tab](images/02-repos.png)
--->
+<img width="1536" height="720" alt="image" src="https://github.com/user-attachments/assets/7dd6d7b9-9465-452b-9810-6761fa76bb0f" />
+
 
 ## Problem 2: Hard reset during kernel install
 
