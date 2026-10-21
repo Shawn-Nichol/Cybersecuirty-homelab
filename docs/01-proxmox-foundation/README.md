@@ -1,5 +1,9 @@
 # Proxmox VE Node: Deployment, Fault Investigation & Stabilization
 
+![Proxmox](https://img.shields.io/badge/Proxmox-VE-E57000?style=for-the-badge&logo=proxmox&logoColor=white)
+![Platform](https://img.shields.io/badge/Platform-Homelab-blue?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Documented-success?style=for-the-badge)
+
 > **Status:** The node is stable on kernel `7.0.14-24-pve`. I re-enabled Turbo Boost and I'm running with the known risk, since this is a non-production lab. I confirmed the fault depends on turbo, but I did not isolate the failing component.
 
 ## Overview
