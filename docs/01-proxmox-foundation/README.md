@@ -1,9 +1,5 @@
 # Proxmox VE Node: Deployment, Fault Investigation & Stabilization
 
-![Proxmox](https://img.shields.io/badge/Proxmox-VE-E57000?style=for-the-badge&logo=proxmox&logoColor=white)
-![Platform](https://img.shields.io/badge/Platform-Homelab-blue?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Documented-success?style=for-the-badge)
-
 > **Status:** The node is stable on kernel `7.0.14-24-pve`. I re-enabled Turbo Boost and I'm running with the known risk, since this is a non-production lab. I confirmed the fault depends on turbo, but I did not isolate the failing component.
 
 ## Overview
@@ -34,8 +30,9 @@ I deployed a single-node Proxmox VE hypervisor as the foundation for a cybersecu
 **Fix:** In the web UI under *Node > Updates > Repositories*, I disabled the enterprise repositories and confirmed `pve-no-subscription` was active.
 **Verification:** `apt update` completed cleanly.
 
-<img width="1536" height="720" alt="image" src="https://github.com/user-attachments/assets/7dd6d7b9-9465-452b-9810-6761fa76bb0f" />
-
+<!-- Uncomment after uploading images/02-repos.png
+![Repositories tab](images/02-repos.png)
+-->
 
 ## Problem 2: Hard reset during kernel install
 
@@ -159,7 +156,7 @@ After the stress tests passed with turbo off, I chose to re-enable turbo and mov
 | Exit criteria | Stable with turbo on at Intel-spec PL1/PL2 power limits. |
 | If it recurs | Check BIOS power limits, swap the PSU, run `memtest86+` and a matched-pair RAM test, then look at Intel's warranty process. |
 
-**Notes on state:** the `proxmox-auto-removal` hook pruned the `7.0.2-6-pve` fallback kernel during the install, so my bootable kernels are now `-24` and `-25`. Only `proxmox-kernel-7.0` is still under `apt-mark hold`.
+**Notes on state:** the `proxmox-auto-removal` hook pruned the `7.0.2-6-pve` fallback kernel during the install, so my bootable kernels are now `-24` and `-25`. The hold on `proxmox-kernel-7.0.14-25-pve-signed` was dropped during recovery, so I re-applied it. Both it and `proxmox-kernel-7.0` are now under `apt-mark hold`.
 
 ## Lessons Learned
 
