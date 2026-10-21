@@ -29,14 +29,23 @@ This shows the current state of the lab. I'll update it as each phase adds compo
 | Storage | 2 x 1 TB NVMe, Btrfs RAID1 |
 | Boot | UEFI, dual ESP via `proxmox-boot-tool` |
 
-## Phases
+## Roadmap
 
-| Phase | Topic | Status | Write-up |
-|---|---|---|---|
-| 01 | Proxmox foundation and fault investigation | Complete | [docs/01-proxmox-foundation](docs/01-proxmox-foundation/README.md) |
-| 02 | Wazuh SIEM with lab endpoints | Planned | |
-| 03 | Network segmentation and firewall | Planned | |
-| 04 | Vulnerability scanning | Planned | |
+| Phase | Topic | What it will show | Status | Write-up |
+|---|---|---|---|---|
+| 01 | Proxmox foundation and fault investigation | Stable hypervisor, documented troubleshooting | Complete | [docs/01-proxmox-foundation](docs/01-proxmox-foundation/README.md) |
+| 02 | Network segmentation with an OPNsense firewall | VLAN design, firewall rules, NAT, and traffic-flow testing | Planned | |
+| 03 | Core lab: Active Directory, Windows and Linux endpoints, Sysmon | Realistic targets that generate useful telemetry | Planned | |
+| 04 | Wazuh SIEM and agent deployment | Log collection and a working detection pipeline | Planned | |
+| 05 | **Project 1:** Attack simulation, detection and triage | Detections mapped to MITRE ATT&CK, with a triage report | Planned | |
+| 06 | **Project 2:** Incident response case study | NIST 800-61 write-up with timeline and lessons learned | Planned | |
+| 07 | **Project 3:** Threat hunt and Sigma rules | Hypothesis-driven hunt with ATT&CK-mapped rules | Planned | |
+| 08 | **Project 4:** Vulnerability management cycle | Scan, prioritize with CVSS and EPSS, remediate, rescan | Planned | |
+
+### Design choices
+
+- **Firewall:** OPNsense sits between my home network and the lab. I'm using it to practice network fundamentals (segmentation, default-deny rules, NAT) and to enforce which segments can talk to each other.
+- **Segments:** management, attacker, victim, and SIEM. The lab segments run on internal Proxmox bridges with no physical port, so attack traffic and scans can only leave through OPNsense and can't reach my home network.
 
 I update the status and add a link as each phase is finished.
 
