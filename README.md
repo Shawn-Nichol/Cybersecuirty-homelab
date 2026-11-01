@@ -13,10 +13,15 @@ flowchart TB
         NIC --- BR["vmbr0 (Linux bridge)"]
         BR --- PVE["Proxmox VE, kernel 7.0.14-24-pve"]
         PVE --- STO[("2 x 1 TB NVMe, Btrfs RAID1")]
+        BR --- FW["OPNsense VM 100 (WAN: vtnet0)"]
+        FW --- MGMT["vmbr1 MGMT 10.10.10.0/24"]
+        FW -.- ATK["vmbr2 ATTACKER 10.10.20.0/24 (planned)"]
+        FW -.- VIC["vmbr3 VICTIM 10.10.30.0/24 (planned)"]
+        FW -.- SIEM["vmbr4 SIEM 10.10.40.0/24 (planned)"]
     end
 ```
 
-This shows the current state of the lab. I'll update it as each phase adds components.
+This shows the current state of the lab. Solid lines are built and dashed lines are planned. The four lab bridges exist, but only the management interface is configured so far. I'll update the diagram as each phase adds components.
 
 ## Environment
 
@@ -28,13 +33,14 @@ This shows the current state of the lab. I'll update it as each phase adds compo
 | RAM | 64 GB DDR5 (4 x 16 GB), non-ECC |
 | Storage | 2 x 1 TB NVMe, Btrfs RAID1 |
 | Boot | UEFI, dual ESP via `proxmox-boot-tool` |
+| Firewall | OPNsense 26.7 (VM 100) |
 
 ## Roadmap
 
 | Phase | Topic | What it will show | Status | Write-up |
 |---|---|---|---|---|
 | 01 | Proxmox foundation and fault investigation | Stable hypervisor, documented troubleshooting | Complete | [docs/01-proxmox-foundation](docs/01-proxmox-foundation/README.md) |
-| 02 | Network segmentation with an OPNsense firewall | VLAN design, firewall rules, NAT, and traffic-flow testing | Planned | |
+| 02 | Network segmentation with an OPNsense firewall | Segmented network design, firewall rules, and traffic-flow testing | In progress: firewall deployed, rules and tests pending | [docs/02-network-segmentation](docs/02-network-segmentation/README.md) |
 | 03 | Core lab: Active Directory, Windows and Linux endpoints, Sysmon | Realistic targets that generate useful telemetry | Planned | |
 | 04 | Wazuh SIEM and agent deployment | Log collection and a working detection pipeline | Planned | |
 | 05 | **Project 1:** Attack simulation, detection and triage | Detections mapped to MITRE ATT&CK, with a triage report | Planned | |
@@ -45,7 +51,7 @@ This shows the current state of the lab. I'll update it as each phase adds compo
 ### Design choices
 
 - **Firewall:** OPNsense sits between my home network and the lab. I'm using it to practice network fundamentals (segmentation, default-deny rules, NAT) and to enforce which segments can talk to each other.
-- **Segments:** management, attacker, victim, and SIEM. The lab segments run on internal Proxmox bridges with no physical port, so attack traffic and scans can only leave through OPNsense and can't reach my home network.
+- **Segments:** management, attacker, victim, and SIEM. The lab segments run on internal Proxmox bridges with no physical port, so attack traffic and scans can only leave through OPNsense and can't reach my home network. Each segment has its own bridge, so I'm not using VLAN tagging.
 
 I update the status and add a link as each phase is finished.
 
@@ -54,6 +60,12 @@ I update the status and add a link as each phase is finished.
 I deployed a single-node Proxmox VE hypervisor and investigated a reproducible hard reset that happened during a kernel package install. Working one variable at a time, I ruled out package corruption, the install hooks, and the NVMe drives, then showed that the failure depended on Turbo Boost: it reset every time with turbo on and passed every test with turbo off, including two 10-minute stress runs. I did not isolate the failing component, so I documented the suspected causes, the compensating control I used, and my decision to accept the remaining risk for a non-production lab.
 
 [Read the full write-up](docs/01-proxmox-foundation/README.md)
+
+## Phase 02 Summary (in progress)
+
+I deployed an OPNsense firewall as a VM with five virtual NICs, one on my home network and four on internal bridges with no physical port. I verified the installer against its published checksum, caught and corrected a default interface assignment that had the WAN and LAN reversed, restricted GUI access on the WAN to a single admin host, and turned IPv6 off after the WAN picked up a public address. I also locked myself out of the GUI once and recovered through the VM console, which the write-up covers. The segment rules and the traffic-flow tests that prove them are the next step, so I haven't claimed any results from them yet.
+
+[Read the write-up so far](docs/02-network-segmentation/README.md)
 
 ## Skills Demonstrated
 
@@ -65,6 +77,11 @@ I deployed a single-node Proxmox VE hypervisor and investigated a reproducible h
 - Load testing with `stress-ng`
 - systemd service authoring
 - Risk assessment and documentation of residual risk
+- Proxmox virtual networking: isolated Linux bridges with no physical port
+- Virtual firewall deployment: OPNsense install, interface mapping, WAN hardening
+- Installer integrity verification with SHA-256
+- Encrypted backup and restore verification (AES-256, hash comparison)
+- Recovery of a locked-out management interface through the VM console
 
 ## Repository Layout
 
@@ -72,7 +89,10 @@ I deployed a single-node Proxmox VE hypervisor and investigated a reproducible h
 cybersecurity-homelab/
 ├── README.md                       this page
 └── docs/
-    └── 01-proxmox-foundation/
+    ├── 01-proxmox-foundation/
+    │   ├── README.md
+    │   └── images/
+    └── 02-network-segmentation/
         ├── README.md
         └── images/
 ```
@@ -81,5 +101,6 @@ New phases get their own folder under `docs/`.
 
 ## Notes
 
-- Everything here runs in a private lab. I redact serial numbers, disk and filesystem identifiers, email addresses, domains, and public IPs from published output.
+- Everything here runs in a private lab. I redact serial numbers, disk and filesystem identifiers, MAC addresses, email addresses, domains, and public IPs from published output.
 - Terminal output in the write-ups is transcribed from real sessions, and each write-up says so where it applies.
+- I don't publish configuration backups or exported firewall configs, because they contain credential hashes and keys.
